@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Farm Adventures GDD</title>
+<style>
+:root{--bg:#f5f1e6;--card:#fffdf7;--ink:#24301f;--muted:#5d6a55;--line:#ddd5c0;--green:#3f8f3a;--sky:#2f8fd8;--chip:#ece6d3}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a13;--card:#1c241a;--ink:#eef2e6;--muted:#a7b39c;--line:#334030;--green:#7ccc6c;--sky:#5fb0f0;--chip:#263122}}
+:root[data-theme="dark"]{--bg:#141a13;--card:#1c241a;--ink:#eef2e6;--muted:#a7b39c;--line:#334030;--green:#7ccc6c;--sky:#5fb0f0;--chip:#263122}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+main{height:100vh;display:flex;flex-direction:column;gap:14px;padding:16px}
+
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px}
+h1{margin:0;font-size:clamp(26px,3.2vw,40px);font-weight:900;letter-spacing:-.03em;line-height:1}
+h1 small{display:block;font-size:13px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--green);margin-bottom:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{padding:4px 12px;border-radius:99px;background:var(--chip);font-size:17px;font-weight:600}
+
+.cols{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{display:flex;flex-direction:column;min-height:0;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px}
+.card h2{margin:0;font-size:21px;font-weight:900}
+.for{margin:2px 0 10px;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:17px}
+.list li{display:flex;gap:10px;align-items:center}
+.list i{font-style:normal;font-size:20px;width:28px;text-align:center;flex:none}
+.flow{--g:clamp(8px,1.8vh,18px);flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:var(--g);padding-right:34px}
+.loop{position:relative;display:flex;flex-direction:column;gap:var(--g);margin-right:-34px;padding-right:34px}
+.loop::before{content:"";position:absolute;right:10px;top:24px;bottom:24px;width:18px;border:2px dashed var(--sky);border-left:0;border-radius:0 12px 12px 0}
+.loop::after{content:"";position:absolute;right:24px;top:18px;border:7px solid transparent;border-right-color:var(--sky);border-left:0}
+.again{position:absolute;right:2px;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;background:var(--card);padding:6px 0;font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--sky)}
+.step{position:relative;display:flex;align-items:center;gap:10px;padding:5px 12px;border:1.5px solid var(--ink);border-radius:10px;background:var(--card);line-height:1.3}
+.step:not(.first)::before{content:"";position:absolute;left:31px;top:calc(-1 * var(--g) - 2px);height:var(--g);border-left:2px solid var(--ink)}
+.step:not(.first)::after{content:"";position:absolute;left:27px;top:-7px;border:5px solid transparent;border-top-color:var(--ink);border-bottom:0}
+.step i{font-style:normal;font-size:21px;width:28px;text-align:center;flex:none}
+.step b{display:block;font-size:17px;font-weight:700}
+.step span{display:block;font-size:15px;color:var(--muted)}
+.foot{margin-top:auto;padding-top:12px;border-top:1px solid var(--line);font-size:17px}
+.foot b{color:var(--green)}
+
+/* Core Loop and Look & UI share this layout so Farm/Outdoors rows line up */
+.pair{flex:1;min-height:0;display:flex;flex-direction:column}
+.row{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center}
+.zone{padding:8px 14px;border:1.5px solid var(--ink);border-radius:10px;line-height:1.3}
+.zone h3{margin:0 0 2px;font-size:17px;font-weight:700}
+.zone ul{list-style:none;margin:0;padding:0;font-size:15px;color:var(--muted)}
+.bar{margin-top:6px;padding:3px 10px;border-radius:99px;font-size:13px;font-weight:800;text-align:center;color:var(--card)}
+.bar.g{background:var(--green)}.bar.s{background:var(--sky)}
+.link{flex:none;height:72px;display:flex;justify-content:center;align-items:center;font-size:17px;font-weight:700}
+.link .muted{color:var(--muted)}
+/* arrows run through the spacers around the boxes, so they reach almost to each box */
+.seg{flex:1;min-height:0;position:relative}
+.arrows{position:relative}
+.ln{position:absolute;top:0;bottom:0;width:0;border-left:3px solid var(--ink)}
+.ln.l{left:36%}.ln.r{left:64%}
+.seg.top .ln{top:5px}.seg.bot .ln{bottom:5px}
+.ln.up::after,.ln.down::after{content:"";position:absolute;left:-10.5px;border:9px solid transparent}
+.ln.up::after{top:-2px;border-bottom:14px solid var(--ink);border-top:0}
+.ln.down::after{bottom:-2px;border-top:14px solid var(--ink);border-bottom:0}
+.lab{position:absolute;top:50%;transform:translateY(-50%);color:var(--sky);line-height:1.2}
+.lab.l{right:calc(64% + 14px);text-align:right}.lab.r{left:calc(64% + 14px)}
+.link .muted{color:var(--muted)}
+.shot{flex:1;min-height:0;display:flex;justify-content:center;align-items:center}
+.shot svg{width:auto;height:100%;max-width:100%}
+svg text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.tight{flex:none}
+
+@media (max-width:900px),(max-height:520px){main{height:auto}.cols{grid-template-columns:1fr}.row,.shot{flex:none}.shot svg{width:100%;height:auto}}
+@media print{@page{size:A4 landscape;margin:8mm}html,body{background:#fff}}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1><small>One-Page GDD</small>Farm Adventures</h1>
+  <div class="chips">
+    <span>🖥️ PC browser game</span>
+    <span>🗺️ Top-down 2D</span>
+    <span>🖱️ Click to move</span>
+    <span>👦 Boys 5–10</span>
+  </div>
+</header>
+
+<div class="cols">
+
+  <section class="card">
+    <h2>The Game</h2>
+    <div class="for">For Head of Marketing</div>
+    <div class="flow">
+      <div class="step first"><i>🏡</i><div><b>Inherit the farm</b><span>Your very own farm in the wilderness</span></div></div>
+      <div class="step"><i>💬</i><div><b>Meet the characters</b><span>Farm Helper, Animal Expert &amp; more</span></div></div>
+      <div class="loop">
+        <div class="step"><i>🌲</i><div><b>Explore the outdoors</b><span>A brand-new adventure every day</span></div></div>
+        <div class="step"><i>🦔</i><div><b>Discover &amp; learn</b><span>Real animals &amp; plants up close</span></div></div>
+        <div class="step"><i>🎒</i><div><b>Bring them home</b><span>Plants, animals &amp; new friends</span></div></div>
+        <div class="step"><i>🌾</i><div><b>Grow your farm</b><span>Expand it and deepen friendships</span></div></div>
+        <span class="again">every day</span>
+      </div>
+    </div>
+    <div class="foot" style="margin-top:14px"><b>Audience:</b> Boys aged 5–10 who love the outdoors</div>
+  </section>
+
+  <section class="card">
+    <h2>Core Loop</h2>
+    <div class="for">For Lead Engineer</div>
+    <div class="pair">
+      <div class="row"><div class="seg"></div><div class="zone">
+        <h3>🏡 Farm (Hub)</h3>
+        <ul>
+          <li>💬 Talk to characters</li>
+          <li>🌱 Add new plants &amp; animals</li>
+          <li>⭐ Upgrade the farm with XP</li>
+        </ul>
+        <div class="bar g">🔒 Persistent · grows with progression</div>
+      </div><div class="seg top"><i class="ln l"></i><i class="ln r up"></i></div></div>
+      <div class="link arrows">
+        <i class="ln l"></i><i class="ln r"></i>
+        <span class="lab l">Go explore</span>
+        <span class="lab r">Bring back<br>finds + XP</span>
+      </div>
+      <div class="row"><div class="seg bot"><i class="ln l down"></i><i class="ln r"></i></div><div class="zone">
+        <h3>🌲 Outdoors</h3>
+        <ul>
+          <li>🎲 Procedurally generated world</li>
+          <li>🔍 Discover new animals &amp; plants</li>
+          <li>🧭 Find adventures &amp; characters</li>
+        </ul>
+        <div class="bar s">📅 New every real-life day · same for all players</div>
+      </div><div class="seg"></div></div>
+    </div>
+    <ul class="list foot tight">
+      <li><i>🖥️</i>Browser game for PC</li>
+      <li><i>🗺️</i>Top-down 2D adventure</li>
+      <li><i>🖱️</i>Click to move, inspect &amp; interact</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Look &amp; UI</h2>
+    <div class="for">For Creative Director</div>
+    <div class="pair">
+      <div class="shot">
+        <svg viewBox="0 0 760 380" role="img" aria-label="Farm screen mock-up: Go Outdoors and Backpack buttons, the farmhouse with an XP upgrade star, a garden, an animal pen, the Farm Helper with a speech bubble, and the player.">
+          <defs><clipPath id="c-farm"><rect width="760" height="380" rx="18"/></clipPath></defs>
+          <g clip-path="url(#c-farm)">
+          <rect width="760" height="380" fill="#cfe9b4"/>
+          <path d="M0 290 Q190 260 380 290 T760 280 V380 H0Z" fill="#b6db93"/>
+
+          <!-- HUD -->
+          <rect x="16" y="14" width="150" height="74" rx="12" fill="#fffdf7" stroke="#24301f" stroke-width="2.5"/>
+          <path d="M34 47 H80 M66 33 L82 47 L66 61" fill="none" stroke="#24301f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="114" y="46" width="6" height="16" fill="#8a5a32" stroke="#24301f" stroke-width="2"/>
+          <ellipse cx="117" cy="40" rx="18" ry="14" fill="#6cc35a" stroke="#24301f" stroke-width="2"/>
+          <text x="91" y="80" text-anchor="middle" font-size="13" font-weight="800" style="fill:#24301f">Go Outdoors</text>
+
+          <rect x="176" y="14" width="96" height="74" rx="12" fill="#fffdf7" stroke="#24301f" stroke-width="2.5"/>
+          <rect x="208" y="30" width="32" height="32" rx="8" fill="#c58a4f" stroke="#24301f" stroke-width="2"/>
+          <path d="M214 30 Q224 18 234 30" fill="none" stroke="#24301f" stroke-width="2"/>
+          <rect x="214" y="40" width="20" height="8" rx="3" fill="#8a5a32"/>
+          <text x="224" y="80" text-anchor="middle" font-size="13" font-weight="800" style="fill:#24301f">Backpack</text>
+
+          <!-- farmhouse -->
+          <g stroke="#24301f" stroke-width="3" stroke-linejoin="round">
+            <rect x="300" y="150" width="160" height="110" fill="#f2b430"/>
+            <path d="M285 150 L380 86 L475 150 Z" fill="#c0533a"/>
+            <rect x="364" y="206" width="32" height="54" fill="#8a5a32"/>
+            <rect x="318" y="174" width="30" height="26" fill="#bfe3ff"/>
+            <rect x="412" y="174" width="30" height="26" fill="#bfe3ff"/>
+          </g>
+          <path d="M500 62 l7 15 l16 2 l-12 11 l3 16 l-14 -8 l-14 8 l3 -16 l-12 -11 l16 -2 z" fill="#f2b430" stroke="#24301f" stroke-width="2.5" stroke-linejoin="round"/>
+          <text x="530" y="90" font-size="18" font-weight="800" style="fill:#24301f">Upgrade with XP</text>
+
+          <!-- garden -->
+          <rect x="40" y="262" width="200" height="84" rx="8" fill="#b07a4a" stroke="#24301f" stroke-width="3"/>
+          <g stroke="#3f8f3a" stroke-width="3">
+            <path d="M70 330 V300 M110 330 V300 M150 330 V300 M190 330 V300"/>
+          </g>
+          <circle cx="70" cy="296" r="8" fill="#f28b30"/><circle cx="110" cy="296" r="8" fill="#6cc35a"/>
+          <circle cx="150" cy="296" r="8" fill="#e8414b"/><circle cx="190" cy="296" r="8" fill="#6cc35a"/>
+          <text x="140" y="254" text-anchor="middle" font-size="18" font-weight="800" style="fill:#24301f">New Plants</text>
+
+          <!-- player -->
+          <g stroke="#24301f" stroke-width="3" fill="none" stroke-linecap="round">
+            <circle cx="280" cy="284" r="12" fill="#ffe0bd"/>
+            <path d="M280 296 V326 M280 326 L268 352 M280 326 L292 352 M280 306 L264 316 M280 306 L298 294"/>
+            <path d="M268 276 Q280 262 292 276" stroke="#8a5a32" stroke-width="5"/>
+          </g>
+
+          <!-- farm helper -->
+          <g stroke="#24301f" stroke-width="3" fill="none" stroke-linecap="round">
+            <circle cx="510" cy="250" r="12" fill="#ffe0bd"/>
+            <path d="M510 262 V292 M510 292 L498 318 M510 292 L522 318 M510 272 L494 282 M510 272 L526 282"/>
+            <path d="M494 242 H526 M500 242 Q510 226 520 242" stroke="#c58a4f" stroke-width="4"/>
+          </g>
+          <path d="M478 182 h64 a10 10 0 0 1 10 10 v20 a10 10 0 0 1 -10 10 h-30 l-10 12 l-2 -12 h-22 a10 10 0 0 1 -10 -10 v-20 a10 10 0 0 1 10 -10 z" fill="#fffdf7" stroke="#24301f" stroke-width="2.5"/>
+          <text x="510" y="210" text-anchor="middle" font-size="18" font-weight="900" style="fill:#24301f">Hi!</text>
+          <text x="510" y="346" text-anchor="middle" font-size="16" font-weight="800" style="fill:#24301f">Farm Helper</text>
+
+          <!-- animal pen -->
+          <g stroke="#8a5a32" stroke-width="4" fill="none">
+            <path d="M580 236 H744 M580 266 H744 M580 236 V330 M622 236 V330 M664 236 V330 M706 236 V330"/>
+          </g>
+          <g stroke="#24301f" stroke-width="2.5" fill="#fffdf7" stroke-linejoin="round">
+            <rect x="640" y="296" width="44" height="22" rx="10"/>
+            <circle cx="634" cy="290" r="13"/>
+            <path d="M624 280 l2 -12 l8 8 M644 280 l-2 -12 l8 8"/>
+            <path d="M684 300 q16 -14 8 -30" fill="none"/>
+            <path d="M648 318 v12 M676 318 v12" fill="none"/>
+          </g>
+          <circle cx="629" cy="288" r="2" fill="#24301f"/><circle cx="639" cy="288" r="2" fill="#24301f"/>
+          <text x="662" y="226" text-anchor="middle" font-size="18" font-weight="800" style="fill:#24301f">New Animals</text>
+          </g>
+          <rect x="674" y="14" width="70" height="30" rx="15" fill="#24301f"/>
+          <text x="709" y="35" text-anchor="middle" font-size="14" font-weight="800" letter-spacing="2" style="fill:#fffdf7">FARM</text>
+          <rect x="2" y="2" width="756" height="376" rx="17" fill="none" stroke="#24301f" stroke-width="4"/>
+        </svg>
+      </div>
+      <div class="link"><span class="muted">&#8645; &ldquo;Go Outdoors&rdquo; / &ldquo;Return to Farm&rdquo;</span></div>
+      <div class="shot">
+        <svg viewBox="0 0 760 380" role="img" aria-label="Outdoor screen mock-up: Return to Farm and Backpack buttons, trees, the player, a New Plant and a New Animal highlighted.">
+          <defs><clipPath id="c-out"><rect width="760" height="380" rx="18"/></clipPath></defs>
+          <g clip-path="url(#c-out)">
+          <rect width="760" height="380" fill="#cfe9b4"/>
+          <path d="M0 300 Q190 270 380 300 T760 290 V380 H0Z" fill="#b6db93"/>
+
+          <rect x="16" y="14" width="150" height="74" rx="12" fill="#fffdf7" stroke="#24301f" stroke-width="2.5"/>
+          <path d="M44 60 V42 L56 32 L68 42 V60 Z" fill="#f2b430" stroke="#24301f" stroke-width="2"/>
+          <rect x="52" y="48" width="8" height="12" fill="#8a5a32"/>
+          <path d="M130 47 H82 M96 33 L80 47 L96 61" fill="none" stroke="#24301f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="91" y="80" text-anchor="middle" font-size="13" font-weight="800" style="fill:#24301f">Return to Farm</text>
+
+          <rect x="176" y="14" width="96" height="74" rx="12" fill="#fffdf7" stroke="#24301f" stroke-width="2.5"/>
+          <rect x="208" y="30" width="32" height="32" rx="8" fill="#c58a4f" stroke="#24301f" stroke-width="2"/>
+          <path d="M214 30 Q224 18 234 30" fill="none" stroke="#24301f" stroke-width="2"/>
+          <rect x="214" y="40" width="20" height="8" rx="3" fill="#8a5a32"/>
+          <text x="224" y="80" text-anchor="middle" font-size="13" font-weight="800" style="fill:#24301f">Backpack</text>
+
+          <g stroke="#24301f" stroke-width="3">
+            <rect x="146" y="250" width="12" height="100" fill="#8a5a32"/>
+            <ellipse cx="152" cy="230" rx="62" ry="48" fill="#6cc35a"/>
+            <rect x="340" y="150" width="10" height="70" fill="#8a5a32"/>
+            <ellipse cx="345" cy="132" rx="56" ry="38" fill="#6cc35a"/>
+            <rect x="702" y="200" width="10" height="120" fill="#8a5a32"/>
+            <ellipse cx="707" cy="178" rx="44" ry="50" fill="#6cc35a"/>
+          </g>
+
+          <g stroke="#24301f" stroke-width="3" fill="none" stroke-linecap="round">
+            <circle cx="300" cy="268" r="12" fill="#ffe0bd"/>
+            <path d="M300 280 V312 M300 312 L288 340 M300 312 L312 340 M300 290 L284 300 M300 290 L318 276"/>
+            <path d="M288 260 Q300 246 312 260" stroke="#8a5a32" stroke-width="5"/>
+          </g>
+
+          <path d="M470 40 l18 18 l22 -10 l6 24 l24 6 l-12 20 l16 18 l-22 8 l2 24 l-24 -6 l-12 20 l-14 -18 l-24 10 l0 -24 l-22 -8 l14 -18 l-12 -22 l24 -2 z" fill="#fff6d6" stroke="#f2b430" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M498 140 V104" stroke="#3f8f3a" stroke-width="3"/>
+          <circle cx="490" cy="96" r="8" fill="#f28b30"/><circle cx="506" cy="96" r="8" fill="#f28b30"/>
+          <circle cx="498" cy="86" r="8" fill="#f28b30"/><circle cx="498" cy="106" r="8" fill="#f28b30"/>
+          <circle cx="498" cy="96" r="6" fill="#6b4ce0"/>
+          <circle cx="530" cy="62" r="13" fill="none" stroke="#24301f" stroke-width="3"/>
+          <path d="M539 71 L556 88" stroke="#24301f" stroke-width="4" stroke-linecap="round"/>
+          <text x="566" y="66" font-size="18" font-weight="800" style="fill:#24301f">New Plant</text>
+
+          <path d="M520 210 l20 14 l20 -14 l8 24 l26 -2 l-8 24 l20 16 l-22 12 l6 24 l-26 -2 l-8 24 l-20 -16 l-20 16 l-8 -24 l-26 2 l6 -24 l-22 -12 l20 -16 l-8 -24 l26 2 z" fill="#fff6d6" stroke="#f2b430" stroke-width="4" stroke-linejoin="round"/>
+          <g stroke="#24301f" stroke-width="2.5" fill="#fffdf7" stroke-linejoin="round">
+            <rect x="530" y="268" width="44" height="22" rx="10"/>
+            <circle cx="524" cy="262" r="13"/>
+            <path d="M514 252 l2 -12 l8 8 M534 252 l-2 -12 l-8 8"/>
+            <path d="M574 272 q16 -14 8 -30" fill="none"/>
+            <path d="M538 290 v12 M566 290 v12" fill="none"/>
+          </g>
+          <circle cx="519" cy="260" r="2" fill="#24301f"/><circle cx="529" cy="260" r="2" fill="#24301f"/>
+          <circle cx="590" cy="222" r="13" fill="none" stroke="#24301f" stroke-width="3"/>
+          <path d="M599 231 L616 248" stroke="#24301f" stroke-width="4" stroke-linecap="round"/>
+          <text x="604" y="300" font-size="18" font-weight="800" style="fill:#24301f">New Animal</text>
+          </g>
+          <rect x="644" y="14" width="100" height="30" rx="15" fill="#24301f"/>
+          <text x="694" y="35" text-anchor="middle" font-size="14" font-weight="800" letter-spacing="2" style="fill:#fffdf7">OUTDOORS</text>
+          <rect x="2" y="2" width="756" height="376" rx="17" fill="none" stroke="#24301f" stroke-width="4"/>
+        </svg>
+      </div>
+    </div>
+    <ul class="list foot tight">
+      <li><i>✨</i>Yellow burst = something new</li>
+      <li><i>🔍</i>Magnifier = inspect &amp; learn</li>
+      <li><i>🔘</i>Big, icon-first buttons</li>
+    </ul>
+  </section>
+
+</div>
+</main>
+</body>
+</html>
